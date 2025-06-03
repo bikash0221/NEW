@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Colorful Register/Login</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ff758c, #ff7eb3);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 360px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+      padding: 30px;
+      display: none;
+      flex-direction: column;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .container.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      padding: 12px;
+      margin: 10px 0;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: #ff758c;
+      box-shadow: 0 0 10px rgba(255,117,140,0.6);
+      outline: none;
+    }
+
+    button {
+      background: linear-gradient(to right, #ff6a00, #ee0979);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #ee0979, #ff6a00);
+    }
+
+    .link-btn {
+      background: none;
+      color: #ff6a00;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 15px;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+
+    .warning {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffeeba;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Home Page -->
+  <div id="home" class="container active">
+    <h2>Welcome</h2>
+    <button onclick="showPage('register')">Register</button>
+    <button onclick="showPage('login')">Login</button>
+  </div>
+
+  <!-- Register Page -->
+  <div id="register" class="container">
+    <h2>Register</h2>
+    <input type="text" id="regUsername" placeholder="Username">
+    <input type="password" id="regPassword" placeholder="Password">
+    <select id="regRole">
+      <option value="">Select Role</option>
+      <option value="Buyer">Buyer</option>
+      <option value="Seller">Seller</option>
+    </select>
+    <button onclick="register()">Register</button>
+    <button class="link-btn" onclick="showPage('home')">← Back</button>
+    <div id="registerMsg" class="message"></div>
+  </div>
+
+  <!-- Login Page -->
+  <div id="login" class="container">
+    <h2>Login</h2>
+    <input type="text" id="loginUsername" placeholder="Username">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <select id="loginRole">
+      <option value="">Select Role</option>
+      <option value="Buyer">Buyer</option>
+      <option value="Seller">Seller</option>
+    </select>
+    <button onclick="login()">Login</button>
+    <button class="link-btn" onclick="showPage('home')">← Back</button>
+    <div id="loginMsg" class="message"></div>
+  </div>
+
+  <script>
+    // 🔥 CLEAR saved data on page load
+    localStorage.removeItem("users");
+
+    function showPage(id) {
+      document.querySelectorAll('.container').forEach(div => div.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      clearMessages();
+    }
+
+    function clearMessages() {
+      document.getElementById("registerMsg").innerHTML = "";
+      document.getElementById("loginMsg").innerHTML = "";
+    }
+
+    function register() {
+      const username = document.getElementById("regUsername").value.trim();
+      const password = document.getElementById("regPassword").value;
+      const role = document.getElementById("regRole").value;
+      const msg = document.getElementById("registerMsg");
+
+      if (!username || !password || !role) {
+        msg.innerHTML = "<div class='message warning'>⚠️ Please fill all fields.</div>";
+        return;
+      }
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      users.push({ username, password, role });
+      localStorage.setItem("users", JSON.stringify(users));
+      msg.innerHTML = "<div class='message success'>✅ Registered successfully!</div>";
+
+      setTimeout(() => showPage('login'), 1000);
+    }
+
+    function login() {
+      const username = document.getElementById("loginUsername").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      const role = document.getElementById("loginRole").value;
+      const msg = document.getElementById("loginMsg");
+
+      if (!username || !password || !role) {
+        msg.innerHTML = "<div class='message warning'>⚠️ Please fill all fields including role.</div>";
+        return;
+      }
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const user = users.find(user => user.username === username && user.password === password && user.role === role);
+
+      if (user) {
+        msg.innerHTML = `<div class='message success'>🎉 Welcome, <strong>${user.username}</strong>! You are logged in as <strong>${user.role}</strong>.</div>`;
+      } else {
+        msg.innerHTML = "<div class='message error'>❌ Invalid credentials or role mismatch.</div>";
+      }
+    }
+  </script>
+</body>
+</html>
